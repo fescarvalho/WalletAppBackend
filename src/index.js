@@ -1,4 +1,5 @@
 const express = require("express");
+const routesCategories = require("./routes/categories");
 const db = require("./db");
 const app = express();
 const port = 3000;
@@ -6,16 +7,9 @@ const port = 3000;
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
+app.use(express.json());
 
-app.get("/categories", (req, res) => {
-  db.query("SELECT * FROM categories", (error, response) => {
-    if (error) {
-      return res.status(500).json(error);
-    }
-
-    return res.status(200).json(response.rows);
-  });
-});
+app.use("/categories", routesCategories);
 
 app.listen(port, () => {
   db.connect()
