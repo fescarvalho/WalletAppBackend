@@ -1,0 +1,130 @@
+const express = require("express");
+const router = express.Router();
+const db = require("../db");
+
+const findByEmail = (email) => {
+  return (query = {
+    name: "fetch-category",
+    text: "SELECT * FROM users WHERE email = $1",
+    values: [email],
+  });
+};
+
+router.get("/", async (req, res) => {
+  try {
+    await db.query(
+      "SELECT * FROM users ORDER BY name",
+      (error, response) => {
+        if (error) return res.status(500).json(error);
+        return res.status(200).json(response.rows);
+      },
+    );
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+});
+
+router.delete("/", async (req, res) => {
+  try {
+    const { email } = req.headers;
+    if (!email)
+      return res.status(400).json({ message: "Email is required." });
+
+    const query = findByEmail(email);
+    const userEmail = await db.query(query);
+    if (!userEmail.rows[0])
+      return res
+        .status(401)
+        .json({ message: "User does not exist." });
+
+    const text = "DELETE FROM users WHERE email=$1 RETURNING *";
+    const values = [email];
+
+    const deleteResponse = await db.query(text, values);
+    if (!deleteResponse.rows[0])
+      return res.status(400).json({ message: "User not deleted." });
+
+    return res.status(200).json(deleteResponse.rows[0]);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+});
+
+router.post("/", async (req, res) => {
+  try {
+    const { name, email } = req.body;
+    if (name.length < 3)
+      return res.status(400).json({
+        mensage: "Name should have more than 3 characters.",
+      });
+
+    if (email.length < 5 || !email.includes("@"))
+      return res.status(400).json({
+        mensage: "Email is invalid.",
+      });
+    const query = findByEmail(email);
+    const alreadyExists = await db.query(query);
+
+    if (alreadyExists.rows[0]) {
+      return res
+        .status(403)
+        .json({ mensage: "User already exists." });
+    }
+
+    const text =
+      "INSERT INTO users(name, email) VALUES($1, $2) RETURNING*";
+    const values = [name, email];
+    const createResponse = await db.query(text, values);
+
+    if (!createResponse.rows[0])
+      return res.status(400).json({ mensage: "User not created." });
+
+    return res.status(200).json(createResponse.rows[0]);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error);
+  }
+});
+
+router.put("/", async (req, res) => {
+  try {
+    const oudEmail = req.headers.email;
+    const { name, email } = req.body;
+
+    if (name.length < 3)
+      return res.status(400).json({
+        mensage: "Name should have more than 3 characters.",
+      });
+    if (email.length < 5 || !email.includes("@"))
+      return res.status(400).json({
+        mensage: "Email is invalid.",
+      });
+
+    const query = findByEmail(oudEmail);
+    const alreadyExists = await db.query(query);
+
+    if (!alreadyExists.rows[0]) {
+      return res
+        .status(404)
+        .json({ mensage: "User does not exists." });
+    }
+    if (oudEmail.length < 5 || !oudEmail.includes("@"))
+      return res.status(400).json({
+        mensage: "Email is invalid.",
+      });
+    const text =
+      "UPDATE users SET name=$1, email=$2 WHERE email=$3 RETURNING*";
+    const values = [name, email, oudEmail];
+    const updateResponse = await db.query(text, values);
+
+    if (!updateResponse.rows[0])
+      return res
+        .status(404)
+        .json({ message: "Categories not updated." });
+
+    return res.status(200).json(updateResponse.rows);
+  } catch (error) {
+    return res.status(400).json(error);
+  }
+});
+module.exports = router;
