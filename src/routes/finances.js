@@ -87,4 +87,41 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+router.get("/", async (req, res) => {
+  try {
+    const { date } = req.query;
+    const { email } = req.headers;
+
+    if (!date || date.length !== 10)
+      return res
+        .status(400)
+        .json({ mensage: "Date is mandatory and shoud be in the format yyyy-mm-dd." });
+
+    if (email.length < 5 || !email.includes("@"))
+      return res.status(400).json({ mensage: "Email is invalid." });
+
+    const userQuery = await db.query(usersQueries.findByEmail(email));
+    if (!userQuery.rows[0]) {
+      return res.status(403).json({ message: "User does not exist." });
+    }
+
+    const dateObject = new Date(date);
+    const year = dateObject.getFullYear();
+    const month = dateObject.getMonth();
+    const initDate = new Date(year, month, 1).toISOString();
+    const finDate = new Date(year, month + 1, 0).toISOString();
+
+    const text =
+      "SELECT fin.id, fin.title, fin.value, fin.date, fin.user_id, fin.category_id, cat.name FROM finances as fin JOIN categories as cat ON fin.category_id = cat.id WHERE fin.user_id=$1 AND fin.date BETWEEN $2 AND $3 ORDER BY fin.date ASC";
+
+    const values = [userQuery.rows[0].id, initDate, finDate];
+    const financesQuery = await db.query(text, values);
+
+    return res.status(200).json(financesQuery.rows);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ error: error.message });
+  }
+});
+
 module.exports = router;
