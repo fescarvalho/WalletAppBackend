@@ -5,10 +5,19 @@ const usersQueries = require("../queries/users");
 
 router.get("/", async (req, res) => {
   try {
-    await db.query("SELECT * FROM users ORDER BY name", (error, response) => {
-      if (error) return res.status(500).json(error);
-      return res.status(200).json(response.rows);
-    });
+    const { email } = req.query;
+
+    if (!email || email.length < 5 || !email.includes("@"))
+      return res.status(400).json({ mensage: "Email is invalid." });
+
+    const query = usersQueries.findByEmail(email);
+    const userExists = await db.query(query);
+
+    if (!userExists.rows[0]) {
+      return res.status(404).json({ error: "User does not exists." });
+    }
+
+    res.status(200).json(userExists.rows[0]);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -84,4 +93,5 @@ router.put("/", async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 });
+
 module.exports = router;
