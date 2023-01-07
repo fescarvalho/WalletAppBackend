@@ -14,7 +14,7 @@ app.use(
 );
 const port = process.env.PORT;
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.send("Ola esta é a API da aplicação WalletWap!");
 });
 app.use(express.json());
 

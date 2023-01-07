@@ -5,6 +5,10 @@
 This is an API created using Node.js Express and PostgresSQL.
 The main goal is create an application that controls user finances.
 
+## API in production
+
+https://walletappbackend-production.up.railway.app/
+
 ## Requirements
 
 - Node.js
@@ -43,7 +47,7 @@ docker run --name postgres-finances -e POSTGRES_PASSWORD=docker -e POSTGRES_USER
 PORT=3000
 
 You can use  for database
-DB_URL=you_db_url
+DATABASE_URL==you_db_url
 
 OR
 
@@ -52,7 +56,6 @@ DB_PASSWORD = docker
 DB_NAME =finances
 DB_HOST = localhost
 DB_PORT = 5432
-
 
 
 ```
