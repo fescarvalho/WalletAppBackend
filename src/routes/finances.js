@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
-const categoriesQueries = require("./queries/categories");
-const usersQueries = require("./queries/users");
+const categoriesQueries = require("../queries/categories");
+const usersQueries = require("../queries/users");
 
 router.post("/", async (req, res) => {
   try {

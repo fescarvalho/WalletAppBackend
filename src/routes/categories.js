@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
-const categoriesQueries = require("./queries/categories");
+const categoriesQueries = require("../queries/categories");
 
 router.get("/", (req, res) => {
   try {
