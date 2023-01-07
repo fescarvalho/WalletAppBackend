@@ -29,7 +29,7 @@ router.delete("/", async (req, res) => {
 
     if (!email) return res.status(400).json({ message: "Email is required." });
 
-    const query = usersQueries.findByemail(email);
+    const query = usersQueries.findByEmail(email);
     const userEmail = await db.query(query);
 
     if (!userEmail.rows[0]) return res.status(401).json({ message: "User does not exist." });
