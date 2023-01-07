@@ -56,6 +56,14 @@ router.post("/", async (req, res) => {
 
     if (email.length < 5 || !email.includes("@"))
       return res.status(400).json({ mensage: "Email is invalid." });
+
+    const text = "INSERT INTO users(name, email) VALUES($1, $2) RETURNING *";
+    const values = [name, email];
+    const createResponse = await db.query(text, values);
+
+    if (!createResponse) return res.status(404).json({ error: "Users not created." });
+
+    return res.status(200).json(createResponse.rows[0]);
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: error.message });
