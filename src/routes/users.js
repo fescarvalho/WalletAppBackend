@@ -11,6 +11,7 @@ router.get("/", async (req, res) => {
     if (!email || email.length < 5 || !email.includes("@"))
       return res.status(400).json({ mensage: "Email is invalid." });
 
+    const query = findByEmail(email);
     const userExists = await db.query(query);
 
     if (!userExists.rows[0]) {
